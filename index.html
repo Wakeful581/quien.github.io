@@ -182,6 +182,43 @@
       text-align: right;
       font-family: 'Segoe UI', sans-serif;
     }
+
+    /* ─── PORTRAIT MÓVIL ─── */
+    @media (max-width: 540px) and (orientation: portrait) {
+
+      /* Centra el contenido y lo empuja ligeramente hacia abajo
+         para que el logo caiga sobre la mitad escénica del fondo */
+      .center {
+        width: 100%;
+        gap: 5vw;
+        margin-top: 18vh;   /* baja el bloque logo+botón al punto donde
+                               el fondo muestra la escena con personajes */
+      }
+
+      /* Logo: ocupa casi todo el ancho de la pantalla */
+      .logo-wrap {
+        width: 88vw;
+        height: 44vw;       /* relación 2:1 igual que la imagen original */
+      }
+
+      /* La imagen se adapta al contenedor en lugar del 300%/300% de escritorio */
+      .logo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      /* Botón "Jugar": ancho y fácil de pulsar con el dedo */
+      .btn-img {
+        width: 72vw;
+        max-width: 340px;
+      }
+
+      /* Icono de sonido un poco más pequeño */
+      .music-btn {
+        width: 62px;
+      }
+    }
   </style>
 </head>
 <body onclick="sound.play()" style="cursor: pointer;">
