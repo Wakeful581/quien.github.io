@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selector de Niveles</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    /* ── Fondo ── */
+    .bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('img/fondos/fondo.png');
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    .bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+    }
+
+    /* ── Botón volver ── */
+    .btn-back {
+      width: 150px;
+      cursor: pointer;
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 2;
+      transition: transform 0.2s;
+    }
+
+    .btn-back:hover  { transform: scale(1.1); }
+    .btn-back:active { transform: scale(0.95); }
+
+    /* ── Panel naranja ── */
+    .panel {
+      position: relative;
+      z-index: 1;
+      background: #5b8d27;
+      border-radius: 16px;
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    .panel-title {
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* ── Grid de niveles ── */
+    .levels-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+
+    /* ── Tarjeta de nivel con imagen ── */
+    .btn-level {
+      width: 110px;
+      height: 110px;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      cursor: pointer;
+      background: none;
+      overflow: visible;
+      transition: transform 0.15s, filter 0.15s;
+      box-shadow: none;
+    }
+
+    .btn-level img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .btn-level:hover {
+      transform: scale(1.08);
+      filter: brightness(1.1);
+    }
+
+    .btn-level:active {
+      transform: scale(0.95);
+    }
+
+    /* ── Logo footer ── */
+    .bottom-logo {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+
+    .bottom-logo img {
+      width: 100px;
+      object-fit: contain;
+      opacity: 0.8;
+    }
+
+    @keyframes floatLogo {
+      0%   { transform: translateX(-50%) translateY(0px); }
+      50%  { transform: translateX(-50%) translateY(-6px); }
+      100% { transform: translateX(-50%) translateY(0px); }
+    }
+
+    /* ── Control de audio ── */
+    .audio-control {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-direction: row-reverse;
+    }
+
+    .music-btn {
+      width: 90px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .music-btn:hover { transform: scale(1.1); }
+
+    .volume-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      border-radius: 50px;
+      padding: 6px 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(12px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .audio-control:hover .volume-wrap {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateX(0);
+    }
+
+    .vol-icon {
+      font-size: 16px;
+      user-select: none;
+      color: #fff;
+    }
+
+    input[type="range"].vol-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.25);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"].vol-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    input[type="range"].vol-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+
+    input[type="range"].vol-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border: none;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+    }
+
+    .vol-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+      min-width: 32px;
+      text-align: right;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — Vertical / Portrait Mobile
+       Solo aplica en pantallas ≤ 600 px portrait.
+       No se toca nada del layout de escritorio.
+    ═══════════════════════════════════════════ */
+    @media screen and (max-width: 600px) and (orientation: portrait) {
+
+      body {
+        gap: 0;
+        justify-content: center;
+      }
+
+      /* ── Panel ── */
+      .panel {
+        width: 88vw;
+        padding: 18px 14px 22px;
+        gap: 14px;
+        border-radius: 14px;
+      }
+
+      .panel-title {
+        font-size: 15px;
+        letter-spacing: 1.2px;
+      }
+
+      /* ── Grid: 5 columnas fluidas ── */
+      .levels-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: clamp(5px, 2vw, 10px);
+        width: 100%;
+      }
+
+      /* ── Botón: ocupa toda la celda, cuadrado ── */
+      .btn-level {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+
+      .btn-level img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      /* ── Botón volver ── */
+      .btn-back {
+        width: clamp(80px, 22vw, 120px);
+        top: 14px;
+        left: 14px;
+      }
+
+      /* ── Botón de música ── */
+      .music-btn {
+        width: clamp(55px, 16vw, 80px);
+      }
+
+      .audio-control {
+        top: 12px;
+        right: 12px;
+      }
+
+      /* ── Logo footer ── */
+      .bottom-logo {
+        bottom: 12px;
+      }
+
+      .bottom-logo img {
+        width: clamp(70px, 20vw, 90px);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <!-- Botón volver al menú -->
+  <img src="img/ui/menu.png"
+       class="btn-back"
+       onclick="window.location.href='index.html'"
+       alt="Volver">
+
+  <!-- Panel de selección -->
+  <div class="panel">
+    <div class="panel-title">Selecciona un Nivel</div>
+
+    <div class="levels-grid">
+      <button class="btn-level" onclick="goTo('tutorial.html')">
+        <img src="img/ui/niveles/nivel1.png" alt="Nivel 1">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel2.html')">
+        <img src="img/ui/niveles/nivel2.png" alt="Nivel 2">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel3.html')">
+        <img src="img/ui/niveles/nivel3.png" alt="Nivel 3">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel4.html')">
+        <img src="img/ui/niveles/nivel4.png" alt="Nivel 4">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel5.html')">
+        <img src="img/ui/niveles/nivel5.png" alt="Nivel 5">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel6.html')">
+        <img src="img/ui/niveles/nivel6.png" alt="Nivel 6">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel7.html')">
+        <img src="img/ui/niveles/nivel7.png" alt="Nivel 7">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel8.html')">
+        <img src="img/ui/niveles/nivel8.png" alt="Nivel 8">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel9.html')">
+        <img src="img/ui/niveles/nivel9.png" alt="Nivel 9">
+      </button>
+      <button class="btn-level" onclick="goTo('niveles/nivel10.html')">
+        <img src="img/ui/niveles/nivel10.png" alt="Nivel 10">
+      </button>
+    </div>
+  </div>
+  <!-- Logo footer -->
+  <div class="bottom-logo">
+    <img src="img/ui/logosit.png" alt="Logo">
+  </div>
+
+  <!-- ── Control de audio ── -->
+  <div class="audio-control">
+    <img src="img/ui/sound-on.png"
+         id="musicBtn"
+         class="music-btn"
+         onclick="toggleMusic(); event.stopPropagation();">
+
+    <div class="volume-wrap" onclick="event.stopPropagation()">
+      <span class="vol-icon">🔊</span>
+      <input type="range" class="vol-slider"
+             id="volSlider"
+             min="0" max="100" value="20"
+             oninput="setVolume(this.value)">
+      <span class="vol-label" id="volLabel">20%</span>
+    </div>
+  </div>
+
+  <audio id="hoverSound" src="sounds/pop.wav"></audio>
+  <audio id="bgMusic"    src="sounds/music.wav" loop></audio>
+
+  <script>
+    const sound  = document.getElementById("hoverSound");
+    const music  = document.getElementById("bgMusic");
+    const btn    = document.getElementById("musicBtn");
+    const slider = document.getElementById("volSlider");
+    const label  = document.getElementById("volLabel");
+
+    let activated    = false;
+    let musicStarted = false;
+
+    document.addEventListener("click", () => {
+      if (!activated && sound) {
+        sound.play().then(() => {
+          sound.pause();
+          sound.currentTime = 0;
+          sound.volume = 0.1;
+          activated = true;
+        }).catch(() => {});
+      }
+      if (!musicStarted && music) {
+        music.volume = slider.value / 100;
+        music.play();
+        musicStarted = true;
+      }
+    });
+
+    function setVolume(val) {
+      const v = val / 100;
+      if (music) music.volume = v;
+      if (sound) sound.volume = Math.min(v, 0.3);
+      label.textContent = val + "%";
+      slider.style.background =
+        `linear-gradient(to right, rgba(255,255,255,0.9) ${val}%, rgba(255,255,255,0.2) ${val}%)`;
+      const icon = document.querySelector('.vol-icon');
+      if (val == 0)      icon.textContent = '🔇';
+      else if (val < 40) icon.textContent = '🔉';
+      else               icon.textContent = '🔊';
+    }
+
+    setVolume(slider.value);
+
+    function toggleMusic() {
+      if (!music || !btn) return;
+      if (music.paused) {
+        music.play();
+        btn.src = "img/ui/sound-on.png";
+      } else {
+        music.pause();
+        btn.src = "img/ui/sound-off.png";
+      }
+    }
+
+    function goTo(url) {
+      if (activated && sound) {
+        sound.currentTime = 0;
+        sound.play();
+        sound.onended = () => window.location.href = url;
+      } else {
+        window.location.href = url;
+      }
+    }
+  </script>
+
+</body>
+</html>
